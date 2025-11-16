@@ -30,7 +30,7 @@ for var in WEATHER_VARS:
         x_columns.append(f'{var}_lag{lag}')
 x_columns.extend(['hour', 'day_of_week'])
 
-# Load preprocessed forecast with all features
+# Load preprocessed forecast with all feature
 avg_forecast = avg_wtd_weather_forecast()
 
 # Remove NaN rows from lags
