@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Wind Power Forecasts</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .row { display: flex; gap: 12px; align-items: center; }
+    .box { margin-top: 16px; }
+    #chartWrap { height: 420px; }
+    canvas { background: #fff; border: 1px solid #eee; border-radius: 6px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Using category axis with ISO labels to avoid extra date adapter -->
+</head>
+<body>
+  <h2>Wind Power Forecasts</h2>
+  <div class="row">
+    <label>
+      Bid zone:
+      <select id="zone">
+        <option>ELSPOT NO1</option>
+        <option>ELSPOT NO2</option>
+        <option>ELSPOT NO3</option>
+        <option>ELSPOT NO4</option>
+      </select>
+    </label>
+    <button id="go">Get forecast</button>
+  </div>
+
+  <div class="box" id="summary"></div>
+  <div class="box" id="chartWrap">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <script>
+    const goBtn = document.getElementById('go');
+    const zoneSel = document.getElementById('zone');
+    const summary = document.getElementById('summary');
+    const chartEl = document.getElementById('chart');
+    let chart = null;
+
+    function upsertChart(labels, dataMW, zone) {
+      const color = 'rgba(33, 150, 243, 0.85)';
+      const border = 'rgba(25, 118, 210, 1)';
+      const cfg = {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: `Predicted MW (${zone})`,
+            data: dataMW,
+            borderColor: border,
+            backgroundColor: color,
+            fill: false,
+            pointRadius: 1.5,
+            borderWidth: 2,
+            tension: 0.2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: 'Time (CET)' } },
+            y: { title: { display: true, text: 'MW' }, beginAtZero: true }
+          },
+          plugins: {
+            legend: { display: true },
+            tooltip: { mode: 'index', intersect: false }
+          }
+        }
+      };
+      if (chart) { chart.destroy(); }
+      chart = new Chart(chartEl.getContext('2d'), cfg);
+    }
+
+    async function load() {
+      summary.textContent = 'Loading...';
+      try {
+        const zone = zoneSel.value;
+        const res = await fetch(`/api/forecast?zone=${encodeURIComponent(zone)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+
+        const labels = data.index; // ISO strings
+        const mw = data.pred_MW;
+        const maxMW = Math.max(...mw);
+        const minMW = Math.min(...mw);
+        const meanMW = mw.reduce((a,b)=>a+b,0) / mw.length;
+        summary.innerHTML = `
+          <b>Zone:</b> ${data.zone} &nbsp; 
+          <b>Horizon:</b> ${labels.length} h &nbsp; 
+          <b>Range:</b> ${minMW.toFixed(2)}—${maxMW.toFixed(2)} MW &nbsp; 
+          <b>Mean:</b> ${meanMW.toFixed(2)} MW`;
+
+        upsertChart(labels, mw, data.zone);
+      } catch (err) {
+        summary.textContent = 'Error: ' + err.message;
+        if (chart) { chart.destroy(); chart = null; }
+      }
+    }
+
+    goBtn.addEventListener('click', load);
+  </script>
+</body>
+</html>
