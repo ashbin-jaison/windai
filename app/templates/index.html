@@ -1,36 +1,144 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <title>Wind Power Forecasts</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .row { display: flex; gap: 12px; align-items: center; }
-    .box { margin-top: 16px; }
-    #chartWrap { height: 420px; }
-    canvas { background: #fff; border: 1px solid #eee; border-radius: 6px; }
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Using category axis with ISO labels to avoid extra date adapter -->
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background: linear-gradient(120deg, #e3f2fd 0%, #f8fafc 100%);
+      margin: 0; padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 700px;
+      margin: 36px auto 0 auto;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px 0 rgba(33,150,243,0.08);
+      padding: 32px 28px 24px 28px;
+    }
+    h2 {
+      margin-top: 0;
+      font-weight: 500;
+      color: #1976d2;
+      letter-spacing: 0.5px;
+    }
+    .row {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    label {
+      font-size: 1.08em;
+      color: #333;
+    }
+    select, button {
+      font-size: 1em;
+      padding: 6px 12px;
+      border-radius: 5px;
+      border: 1px solid #b0bec5;
+      background: #f5faff;
+      margin-left: 6px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    select:focus, button:focus {
+      border: 1.5px solid #1976d2;
+    }
+    button {
+      background: linear-gradient(90deg, #1976d2 60%, #64b5f6 100%);
+      color: #fff;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 8px 0 rgba(33,150,243,0.08);
+      margin-left: 18px;
+      padding: 7px 22px;
+      letter-spacing: 0.5px;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #1565c0 60%, #42a5f5 100%);
+    }
+    #summary {
+      margin-bottom: 18px;
+      font-size: 1.08em;
+      color: #1976d2;
+      background: #e3f2fd;
+      border-radius: 7px;
+      padding: 10px 16px;
+      box-shadow: 0 1px 4px 0 rgba(33,150,243,0.04);
+      min-height: 36px;
+    }
+    .chartRow {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    #mapContainer {
+      flex: 0 0 240px;
+      background: #f5faff;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 1px 8px 0 rgba(33,150,243,0.06);
+    }
+    #bidZonesMap {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px 0 rgba(33,150,243,0.08);
+    }
+    #chartWrap {
+      flex: 1;
+      height: 420px;
+      background: #f5faff;
+      border-radius: 10px;
+      box-shadow: 0 1px 8px 0 rgba(33,150,243,0.06);
+      padding: 18px 12px 8px 12px;
+    }
+    canvas {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px 0 rgba(33,150,243,0.04);
+    }
+    @media (max-width: 800px) {
+      .container { max-width: 98vw; padding: 10vw 2vw 4vw 2vw; }
+      .chartRow { flex-direction: column; }
+      #mapContainer { flex: 1; width: 100%; }
+      #chartWrap { height: 260px; }
+    }
+  </style>
 </head>
 <body>
-  <h2>Wind Power Forecasts</h2>
-  <div class="row">
-    <label>
-      Bid zone:
-      <select id="zone">
-        <option>ELSPOT NO1</option>
-        <option>ELSPOT NO2</option>
-        <option>ELSPOT NO3</option>
-        <option>ELSPOT NO4</option>
-      </select>
-    </label>
-    <button id="go">Get forecast</button>
-  </div>
+  <div class="container">
+    <h2>Wind Power Forecasts</h2>
+    <div class="row">
+      <label>
+        Bid zone:
+        <select id="zone">
+          <option>ELSPOT NO1</option>
+          <option>ELSPOT NO2</option>
+          <option>ELSPOT NO3</option>
+          <option>ELSPOT NO4</option>
+        </select>
+      </label>
+      <button id="go">Get forecast</button>
+    </div>
 
-  <div class="box" id="summary"></div>
-  <div class="box" id="chartWrap">
-    <canvas id="chart"></canvas>
+    <div id="summary"></div>
+    <div class="chartRow">
+      <div id="chartWrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <div id="mapContainer">
+        <img src="{{ url_for('static', filename='bid_zones.webp') }}" alt="Norwegian Bidding Zones Map" id="bidZonesMap">
+      </div>
+    </div>
   </div>
 
   <script>
@@ -52,22 +160,37 @@
             data: dataMW,
             borderColor: border,
             backgroundColor: color,
-            fill: false,
-            pointRadius: 1.5,
-            borderWidth: 2,
-            tension: 0.2
+            fill: true,
+            pointRadius: 2.2,
+            borderWidth: 2.5,
+            tension: 0.22,
+            pointHoverRadius: 5,
+            pointBackgroundColor: border,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 1.5,
+            cubicInterpolationMode: 'monotone',
+            spanGaps: true
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { title: { display: true, text: 'Time (CET)' } },
-            y: { title: { display: true, text: 'MW' }, beginAtZero: true }
+            x: {
+              title: { display: true, text: 'Time (CET)', color: '#1976d2', font: { weight: 500 } },
+              ticks: { color: '#1976d2', maxTicksLimit: 12, autoSkip: true },
+              grid: { color: '#e3f2fd' }
+            },
+            y: {
+              title: { display: true, text: 'MW', color: '#1976d2', font: { weight: 500 } },
+              beginAtZero: true,
+              ticks: { color: '#1976d2' },
+              grid: { color: '#e3f2fd' }
+            }
           },
           plugins: {
-            legend: { display: true },
-            tooltip: { mode: 'index', intersect: false }
+            legend: { display: true, labels: { color: '#1976d2', font: { weight: 500 } } },
+            tooltip: { mode: 'index', intersect: false, backgroundColor: '#1976d2', titleColor: '#fff', bodyColor: '#fff' }
           }
         }
       };
@@ -102,6 +225,8 @@
     }
 
     goBtn.addEventListener('click', load);
+    // Auto-load on page open
+    window.addEventListener('DOMContentLoaded', load);
   </script>
 </body>
 </html>
