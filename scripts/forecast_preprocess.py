@@ -5,11 +5,22 @@ import pandas as pd
 
 
 def open_opendap_dataset(url):
+    """Open an OPeNDAP dataset, preferring the pure-Python 'pydap' engine
+    for compatibility in slim containers (e.g., Railway) where netCDF4/HDF5
+    native libraries are not available.
+    """
+    # Try pydap engine first (no native deps)
+    try:
+        ds = xr.open_dataset(url, engine="pydap")
+        return ds
+    except Exception as e:
+        print(f"OPeNDAP open via pydap failed: {e}")
+    # Fallback to default engine (requires netCDF4 stack)
     try:
         ds = xr.open_dataset(url)
         return ds
     except Exception as e:
-        print(f"Error opening OPeNDAP dataset: {e}")
+        print(f"Error opening OPeNDAP dataset (default engine): {e}")
         return None
     
 def load_data():
