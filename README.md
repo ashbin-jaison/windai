@@ -135,16 +135,14 @@ Multiple ML algorithms were trained and compared across all bidding zones:
 
 ## Performance
 
-**Test Set Metrics (All Zones):**
+**Test Set Metrics - RMSE (MW):**
 
 | Zone | Linear Regression | Random Forest | XGBoost | LightGBM | Ensemble |
 |------|------------------|---------------|---------|----------|----------|
-| **ELSPOT NO1** | RMSE (CF): 0.1450<br>RMSE (MW): 75.2 | RMSE (CF): 0.1380<br>RMSE (MW): 71.5 | RMSE (CF): 0.1360<br>RMSE (MW): 70.4 | RMSE (CF): 0.1370<br>RMSE (MW): 71.0 | RMSE (CF): 0.1355<br>RMSE (MW): 70.1 |
-| **ELSPOT NO2** | RMSE (CF): 0.1520<br>RMSE (MW): 45.2 | RMSE (CF): 0.1440<br>RMSE (MW): 42.8 | RMSE (CF): 0.1420<br>RMSE (MW): 42.2 | RMSE (CF): 0.1430<br>RMSE (MW): 42.5 | RMSE (CF): 0.1415<br>RMSE (MW): 42.0 |
-| **ELSPOT NO3** | RMSE (CF): 0.1480<br>RMSE (MW): 38.5 | RMSE (CF): 0.1410<br>RMSE (MW): 36.7 | RMSE (CF): 0.1390<br>RMSE (MW): 36.2 | RMSE (CF): 0.1400<br>RMSE (MW): 36.4 | RMSE (CF): 0.1385<br>RMSE (MW): 36.0 |
-| **ELSPOT NO4** | RMSE (CF): 0.1510<br>RMSE (MW): 52.8 | RMSE (CF): 0.1430<br>RMSE (MW): 50.0 | RMSE (CF): 0.1410<br>RMSE (MW): 49.3 | RMSE (CF): 0.1420<br>RMSE (MW): 49.6 | RMSE (CF): 0.1405<br>RMSE (MW): 49.1 |
-
-*CF = Capacity Factor, MW = Megawatts*
+| **ELSPOT NO1** | 70 | 64 | **59** | 60 | 60 |
+| **ELSPOT NO2** | 142 | **132** | 135 | 136 | 132 |
+| **ELSPOT NO3** | **199** | 207 | 213 | 217 | 209 |
+| **ELSPOT NO4** | 110 | **104** | 106 | 107 | 104 |
 
 **Notes:**
 - All models trained for all zones (NO1-NO4)
