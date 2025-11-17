@@ -14,7 +14,7 @@
       min-height: 100vh;
     }
     .container {
-      max-width: 700px;
+      max-width: 1100px;
       margin: 36px auto 0 auto;
       background: #fff;
       border-radius: 14px;
@@ -93,6 +93,13 @@
       border-radius: 8px;
       box-shadow: 0 2px 12px 0 rgba(33,150,243,0.08);
     }
+    .mapCaption {
+      text-align: center;
+      font-size: 0.9em;
+      color: #1976d2;
+      margin-top: 8px;
+      font-weight: 500;
+    }
     #chartWrap {
       flex: 1;
       height: 420px;
@@ -137,6 +144,7 @@
       </div>
       <div id="mapContainer">
         <img src="{{ url_for('static', filename='bid_zones.webp') }}" alt="Norwegian Bidding Zones Map" id="bidZonesMap">
+        <div class="mapCaption">Norwegian Bidding Zones</div>
       </div>
     </div>
   </div>
@@ -206,7 +214,16 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed');
 
-        const labels = data.index; // ISO strings
+        // Format timestamps to dd-mm-yyyy, HH
+        const labels = data.index.map(isoStr => {
+          const d = new Date(isoStr);
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const year = d.getFullYear();
+          const hour = String(d.getHours()).padStart(2, '0');
+          return `${day}-${month}-${year}, ${hour}h`;
+        });
+
         const mw = data.pred_MW;
         const maxMW = Math.max(...mw);
         const minMW = Math.min(...mw);
