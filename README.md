@@ -113,10 +113,7 @@ Features:
 
 **Lag Features:**
 - Weather variable lags (t-1, t-2)
-- Historical power lags (t-48 to t-168 hours)
 
-**Rolling Statistics:**
-- Power mean/std over 6h, 12h, 24h, 48h windows
 
 ### Model Architecture
 
@@ -168,15 +165,12 @@ Returns JSON forecast for specified bidding zone. Currently only **ELSPOT NO1** 
 }
 ```
 
-#### `GET /health`
-
-Health check endpoint.
 
 ## Configuration
 
 ### Customizing Locations
 
-Edit `scripts/forecast_preprocess.py` to modify wind farm locations for forecast extraction:
+Edit `scripts/forecast_preprocess.py` to modify wind farm locations for forecast extraction from other zones.  The windfarm locations where manually identified from google maps:
 
 ```python
 locations = {
@@ -214,29 +208,6 @@ Add custom features in the preprocessing pipeline:
 - Edit `forecast_preprocess.py` for forecast-time features
 - Edit `fit_ml.py` for training-time features
 - Ensure feature columns match exactly between training and inference
-
-## Troubleshooting
-
-**Model not found error:**
-- Run `scripts/fit_ml.py` first to train and save the model
-
-**Missing dependencies:**
-- Install joblib: `pip install joblib`
-
-**OPeNDAP timeout:**
-- Check internet connection
-- MET Norway service may be temporarily down
-
-**Feature mismatch:**
-- Ensure `WEATHER_VARS` list is identical in `fit_ml.py`, `power_forecasts.py`, and `app/app.py`
-
-## License
-
-MIT
-
-## Contributors
-
-Ashbin Jaison
 
 ## Acknowledgements
 

@@ -43,7 +43,7 @@ result = []
 # Modelling this bid zone
 bid_zone = 'ELSPOT NO1'
 
-for bid_zone in ['ELSPOT NO1', 'ELSPOT NO2', 'ELSPOT NO3', 'ELSPOT NO4']:  # You can add more bid zones here
+for bid_zone in ['ELSPOT NO1', 'ELSPOT NO2', 'ELSPOT NO3', 'ELSPOT NO4']: 
 
     # Selecting the windparks in bid zone from metadata
     _windparks_in_bid_zone = windparks[windparks['bidding_area'] == bid_zone]
